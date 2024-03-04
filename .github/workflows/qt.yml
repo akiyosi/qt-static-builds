@@ -1,0 +1,178 @@
+name: build-qt
+
+on: [push]
+
+env: 
+  qt_ver:    "5.15.12"
+
+jobs:
+
+  qt-for-linux:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Linux prerequisites 
+      run: |
+        sudo apt update
+        sudo apt-get -y install build-essential libglu1-mesa-dev libpulse-dev libglib2.0-dev cmake
+        sudo apt-get --no-install-recommends -qq -y install fontconfig libasound2 libegl1-mesa libnss3 libpci3 libxcomposite1 libxcursor1 libxi6 libxrandr2 libxtst6
+        sudo apt-get --no-install-recommends -qq -y install libdbus-1-dev libssl-dev libzstd-dev
+        sudo apt-get install '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
+        sudo apt-get install libwayland-dev libwayland-egl++ wayland-scanner++
+
+    - name: Build Qt
+      run: |
+        curl -L -o qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz https://download.qt.io/official_releases/qt/5.15/${{ env.qt_ver }}/single/qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
+        tar Jxf qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
+        rm qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
+        mv qt-everywhere-src-${{ env.qt_ver }} qt5
+        ls -l ${{ github.workspace }}/qt5
+        cd ${{ github.workspace }}/qt5 && ./configure -prefix ${{ github.workspace }}/Qt/${{ env.qt_ver }}/gcc_64 -no-icu -confirm-license -opensource -static -qt-zlib -qt-libpng -qt-libjpeg -xcb -xcb-xlib -bundled-xcb-xinput -sysconfdir /etc/xdg -dbus-runtime -openssl-runtime -opengl -optimize-size -skip qtwebengine -skip qtfeedback -skip qtpim -feature-wayland-client -nomake tests -nomake examples && make -j $(grep -c ^processor /proc/cpuinfo) && make install -j $(grep -c ^processor /proc/cpuinfo)
+        rm -fr ${{ github.workspace }}/qt5
+
+    - name: Build fcitx5
+      env: 
+        FILE: ${{ github.workspace }}/fcitx-qt5/qt5/platforminputcontext/CMakeLists.txt
+        CMAKE_PREFIX_PATH: ${{ github.workspace }}/Qt/${{ env.qt_ver }}/gcc_64/lib/cmake
+        Qt5_DIR: ${{ github.workspace }}/Qt/${{ env.qt_ver }}/gcc_64/lib/cmake/Qt5
+      run: |
+        git clone -q --depth 1 https://github.com/fcitx/fcitx-qt5.git
+        echo -e "ADD_DEFINITIONS(-DQT_STATICPLUGIN)\n$(cat $FILE)" > $FILE 
+        echo -e "find_package(Qt5 REQUIRED COMPONENTS Core Gui DBus)\n$(cat $FILE)" > $FILE 
+        echo -e "$(head -n -5 $FILE)" > $FILE 
+        sed -i -e 's/ MODULE / STATIC /g' $FILE
+        cd fcitx-qt5/qt5/platforminputcontext && cmake . &&  make -j $(grep -c ^processor /proc/cpuinfo)
+
+    - name: Copy libfcitxplatforminputcontextplugin.a
+      run: |
+        cp -p ${{ github.workspace }}/fcitx-qt5/qt5/platforminputcontext/libfcitxplatforminputcontextplugin.a ${{ github.workspace }}/Qt/${{ env.qt_ver }}/gcc_64/plugins/platforminputcontexts/
+        rm -fr ${{ github.workspace }}/fcitx-qt5
+
+    - name: Package
+      env:
+        archiveName: qt-linux-${{ env.qt_ver }}
+      run: |
+        tar -jcvf ${{env.archiveName}}.tar.bz2 ${{ github.workspace }}/Qt
+
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: qt-linux-static
+        path: ${{env.archiveName}}.tar.bz2
+
+
+
+  qt-for-macos-arm64:
+    runs-on: macos-14
+    steps:
+
+    - name: Download Qt src
+      run: |
+        curl -L -o qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz https://download.qt.io/official_releases/qt/5.15/${{ env.qt_ver }}/single/qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
+        tar Jxf qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
+        rm qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
+        mv qt-everywhere-src-${{ env.qt_ver }} qt5
+
+    - name: Build Qt
+      run: |
+        cd ${{ github.workspace }}/qt5/qtbase
+        curl -L "https://codereview.qt-project.org/gitweb?p=qt/qtbase.git;a=patch;h=cdf64b0e47115cc473e1afd1472b4b09e130b2a5" -o cdf64b0.diff
+        patch -p1 < ./cdf64b0.diff
+        cd ..
+        ./configure -static -release -prefix ${{ github.workspace }}/Qt -platform macx-clang -skip qt3d -skip qtandroidextras -skip qtwayland -skip webengine -skip qtwinextras -skip qtx11extras -nomake tests -nomake examples -opensource -confirm-license -c++std c++17
+        sudo make -j 3
+        sudo make install -j 3
+        rm -fr ${{ github.workspace }}/qt5
+
+    - name: Package
+      env:
+        archiveName: qt-macos-arm64-${{ env.qt_ver }}
+      run: |
+        tar -jcvf ${{env.archiveName}}.tar.bz2 ${{ github.workspace }}/Qt
+
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: qt-macos-arm64-static
+        path: ${{env.archiveName}}.tar.bz2
+
+
+  qt-for-mingw:
+    runs-on: windows-latest
+    steps:
+    
+    - name: Install correct version of Environment
+      run: |
+        choco uninstall mingw --force
+        choco install mingw --x64 --version=8.1.0 
+
+    - name: Download Source
+      shell: cmd
+      run: |
+        curl -L -o qt-everywhere-opensource-src-${{ env.qt_ver }}.zip https://download.qt.io/official_releases/qt/5.15/${{ env.qt_ver }}/single/qt-everywhere-opensource-src-${{ env.qt_ver }}.zip
+        7z x -y qt-everywhere-opensource-src-${{ env.qt_ver }}.zip -oC:\
+        rm qt-everywhere-opensource-src-${{ env.qt_ver }}.zip
+        mv C:\qt-everywhere-src-${{ env.qt_ver }} C:\qt5
+        dir C:\qt5
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        repository: ''
+        fetch-depth: 0
+        path: .
+
+    # - name: Patch
+    #   run: |
+    #     cd C:\qt5
+    #     $ch1="defined(Q_CC_MINGW) && WINVER < 0x0602"
+    #     $rep1="defined(Q_CC_MINGW) && WINVER < 0x0602 && !(_WIN32_WINNT >= _WIN32_WINNT_WIN8)"
+    #     $data=Get-Content  .\qtbase\src\corelib\io\qfilesystemengine_win.cpp | % { $_ -replace [regex]::Escape($ch1), $rep1 }
+    #     $data | Out-File   .\qtbase\src\corelib\io\qfilesystemengine_win.cpp -Encoding UTF8
+    #     (Get-Content qtbase\src\corelib\io\qfilesystemengine_win.cpp)[650..670]
+
+    - name: Build
+      run: |
+        mkdir C:\qt5_shadow
+        cd C:\qt5_shadow
+        ..\qt5\configure.bat -platform win32-g++ -prefix "D:\\qt5" -datadir "D:\\qt5\\share\\qt5" -archdatadir "D:\\qt5\\share\\qt5" -examplesdir "D:\\qt5\\share\\qt5\\examples" -testsdir "D:\\qt5\\share\\qt5\\tests" -opengl desktop -release -opensource -confirm-license -static -static-runtime -no-jasper -no-mng -D "JAS_DLL=0" -no-openssl -nomake tests -nomake examples -no-icu -no-fontconfig -schannel -dbus -qt-freetype -qt-pcre -qt-libpng -qt-libjpeg -qt-harfbuzz -qt-assimp -qt-doubleconversion -qt-tiff -qt-webp -no-iconv -no-gstreamer -no-wmf -feature-relocatable -no-sql-ibase -no-sql-mysql -no-sql-odbc -no-sql-psql -no-sql-sqlite2 -sql-sqlite -qt-sqlite -skip qttools -skip qtandroidextras -skip qtmacextras -skip qtwayland -skip qtwebchannel -skip qtwebengine -skip qtwebview
+        mingw32-make -j2
+        mingw32-make install
+
+    - name: Package
+      env:
+        archiveName: qt-win-${{ env.qt_ver }}
+      run: |
+        7z a ${{env.archiveName}}.zip D:\qt5
+
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: qt-win-static
+        path: ${{env.archiveName}}.zip
+
+
+  publish:
+    needs: [qt-for-mingw, qt-for-macos-arm64, qt-for-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gettext-base
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete qt-static-${{ env.qt_ver }} --yes || true
+          git push origin qt-static-${{ env.qt_ver }} || true
+          gh release create qt-static-${{ env.qt_ver }} --title qt-static-${{ env.qt_ver }} /home/runner/work/qt-static-builds/qt-static-builds/qt-win-static/* /home/runner/work/qt-static-builds/qt-static-builds/qt-macos-arm64-static/* /home/runner/work/qt-static-builds/qt-static-builds/qt-linux-static/*
+
