@@ -106,7 +106,7 @@ jobs:
     - name: Install correct version of Environment
       run: |
         choco uninstall mingw --force
-        choco install mingw --x64 --version=13.2.0 
+        choco install mingw --x64 --version=8.1.0 
 
     - name: Download Source
       shell: cmd
@@ -124,14 +124,14 @@ jobs:
         fetch-depth: 0
         path: .
 
-    # - name: Patch
-    #   run: |
-    #     cd C:\qt5
-    #     $ch1="defined(Q_CC_MINGW) && WINVER < 0x0602"
-    #     $rep1="defined(Q_CC_MINGW) && WINVER < 0x0602 && !(_WIN32_WINNT >= _WIN32_WINNT_WIN8)"
-    #     $data=Get-Content  .\qtbase\src\corelib\io\qfilesystemengine_win.cpp | % { $_ -replace [regex]::Escape($ch1), $rep1 }
-    #     $data | Out-File   .\qtbase\src\corelib\io\qfilesystemengine_win.cpp -Encoding UTF8
-    #     (Get-Content qtbase\src\corelib\io\qfilesystemengine_win.cpp)[650..670]
+    - name: Patch
+      run: |
+        cd C:\qt5
+        $ch1="defined(Q_CC_MINGW) && WINVER < 0x0602"
+        $rep1="defined(Q_CC_MINGW) && WINVER < 0x0602 && !(_WIN32_WINNT >= _WIN32_WINNT_WIN8)"
+        $data=Get-Content  .\qtbase\src\corelib\io\qfilesystemengine_win.cpp | % { $_ -replace [regex]::Escape($ch1), $rep1 }
+        $data | Out-File   .\qtbase\src\corelib\io\qfilesystemengine_win.cpp -Encoding UTF8
+        (Get-Content qtbase\src\corelib\io\qfilesystemengine_win.cpp)[650..670]
 
     - name: Build
       run: |
