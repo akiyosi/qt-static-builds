@@ -106,7 +106,7 @@ jobs:
     - name: Install correct version of Environment
       run: |
         choco uninstall mingw --force
-        choco install mingw --x64 --version=8.1.0 
+        choco install mingw --x64 --version=13.2.0 
 
     - name: Download Source
       shell: cmd
