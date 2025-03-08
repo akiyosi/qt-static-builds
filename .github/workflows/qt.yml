@@ -3,7 +3,7 @@ name: build-qt
 on: [push]
 
 env: 
-  qt_ver:    "5.15.12"
+  qt_ver:    "5.15.16"
 
 jobs:
 
@@ -79,7 +79,7 @@ jobs:
         curl -L "https://codereview.qt-project.org/gitweb?p=qt/qtbase.git;a=patch;h=cdf64b0e47115cc473e1afd1472b4b09e130b2a5" -o cdf64b0.diff
         patch -p1 < ./cdf64b0.diff
         cd ..
-        ./configure -static -release -prefix ${{ github.workspace }}/Qt -platform macx-clang -skip qt3d -skip qtandroidextras -skip qtwayland -skip webengine -skip qtwinextras -skip qtx11extras -nomake tests -nomake examples -opensource -confirm-license -c++std c++17
+        ./configure -static -release -prefix ${{ github.workspace }}/Qt -platform macx-clang -skip qtandroidextras -skip qtwayland -skip webengine -skip qtwinextras -skip qtx11extras -nomake tests -nomake examples -opensource -confirm-license -c++std c++17
         sudo make -j 3
         sudo make install -j 3
         rm -fr ${{ github.workspace }}/qt5
