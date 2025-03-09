@@ -43,7 +43,7 @@ jobs:
         echo -e "find_package(Qt5 REQUIRED COMPONENTS Core Gui DBus)\n$(cat $FILE)" > $FILE 
         echo -e "$(head -n -5 $FILE)" > $FILE 
         sed -i -e 's/ MODULE / STATIC /g' $FILE
-        cd fcitx-qt5/qt5/platforminputcontext && cmake . &&  make -j $(grep -c ^processor /proc/cpuinfo)
+        cd fcitx-qt5/qt5/platforminputcontext && cmake . &&  make -j 1
 
     - name: Copy libfcitxplatforminputcontextplugin.a
       run: |
@@ -82,8 +82,8 @@ jobs:
         patch -p1 < ./cdf64b0.diff
         cd ..
         ./configure -static -release -prefix ${{ github.workspace }}/Qt -platform macx-clang -skip qtandroidextras -skip qtwayland -skip webengine -skip qtwinextras -skip qtx11extras -nomake tests -nomake examples -opensource -confirm-license -c++std c++17
-        sudo make -j 3
-        sudo make install -j 3
+        sudo make -j 1
+        sudo make install -j 1
         rm -fr ${{ github.workspace }}/qt5
 
     - name: Package
@@ -138,7 +138,7 @@ jobs:
         mkdir C:\qt5_shadow
         cd C:\qt5_shadow
         ..\qt5\configure.bat -platform win32-g++ -prefix "D:\\qt5" -datadir "D:\\qt5\\share\\qt5" -archdatadir "D:\\qt5\\share\\qt5" -examplesdir "D:\\qt5\\share\\qt5\\examples" -testsdir "D:\\qt5\\share\\qt5\\tests" -opengl desktop -release -opensource -confirm-license -static -static-runtime -no-jasper -no-mng -D "JAS_DLL=0" -no-openssl -nomake tests -nomake examples -no-icu -no-fontconfig -schannel -dbus -qt-freetype -qt-pcre -qt-libpng -qt-libjpeg -qt-harfbuzz -qt-assimp -qt-doubleconversion -qt-tiff -qt-webp -no-iconv -no-gstreamer -no-wmf -feature-relocatable -no-sql-ibase -no-sql-mysql -no-sql-odbc -no-sql-psql -no-sql-sqlite2 -sql-sqlite -qt-sqlite -skip qttools -skip qtandroidextras -skip qtmacextras -skip qtwayland -skip qtwebchannel -skip qtwebengine -skip qtwebview
-        mingw32-make -j2
+        mingw32-make -j1
         mingw32-make install
 
     - name: Package
