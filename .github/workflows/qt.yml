@@ -75,6 +75,10 @@ jobs:
         rm qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
         mv qt-everywhere-src-${{ env.qt_ver }} qt5
 
+    - name: macOS prerequisites
+      run: |
+        brew install boost
+
     - name: Build Qt
       run: |
         cd ${{ github.workspace }}/qt5/qtbase
