@@ -133,6 +133,13 @@ jobs:
         $data | Out-File   .\qtbase\src\corelib\io\qfilesystemengine_win.cpp -Encoding UTF8
         (Get-Content qtbase\src\corelib\io\qfilesystemengine_win.cpp)[650..670]
 
+    - name: Set up fxc.exe path
+      run: |
+        $WinSdkPath = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -requires Microsoft.VisualStudio.Component.Windows10SDK -property installationPath
+        $WinSdkBin = "${WinSdkPath}\VC\Tools\MSVC\*\bin\Hostx64\x64"
+        echo "Adding Windows SDK bin path: $WinSdkBin"
+        echo "$WinSdkBin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
+
     - name: Build
       run: |
         mkdir C:\qt5_shadow
