@@ -86,8 +86,8 @@ jobs:
         patch -p1 < ./cdf64b0.diff
         cd ..
         ./configure -static -release -prefix ${{ github.workspace }}/Qt -platform macx-clang -skip qtandroidextras -skip qtwayland -skip webengine -skip qtwinextras -skip qtx11extras -nomake tests -nomake examples -opensource -confirm-license -c++std c++17
-        sudo make -j 1
-        sudo make install -j 1
+        sudo make -j 2
+        sudo make install -j 2
         rm -fr ${{ github.workspace }}/qt5
 
     - name: Package
@@ -137,15 +137,12 @@ jobs:
         $data | Out-File   .\qtbase\src\corelib\io\qfilesystemengine_win.cpp -Encoding UTF8
         (Get-Content qtbase\src\corelib\io\qfilesystemengine_win.cpp)[650..670]
 
-    - name: Set up fxc.exe path
+    - name: Build
       run: |
         $WinSdkPath = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -requires Microsoft.VisualStudio.Component.Windows10SDK -property installationPath
         $WinSdkBin = "${WinSdkPath}\VC\Tools\MSVC\*\bin\Hostx64\x64"
         echo "Adding Windows SDK bin path: $WinSdkBin"
         echo "$WinSdkBin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
-
-    - name: Build
-      run: |
         mkdir C:\qt5_shadow
         cd C:\qt5_shadow
         ..\qt5\configure.bat -platform win32-g++ -prefix "D:\\qt5" -datadir "D:\\qt5\\share\\qt5" -archdatadir "D:\\qt5\\share\\qt5" -examplesdir "D:\\qt5\\share\\qt5\\examples" -testsdir "D:\\qt5\\share\\qt5\\tests" -opengl desktop -release -opensource -confirm-license -static -static-runtime -no-jasper -no-mng -D "JAS_DLL=0" -no-openssl -nomake tests -nomake examples -no-icu -no-fontconfig -schannel -dbus -qt-freetype -qt-pcre -qt-libpng -qt-libjpeg -qt-harfbuzz -qt-assimp -qt-doubleconversion -qt-tiff -qt-webp -no-iconv -no-gstreamer -no-wmf -feature-relocatable -no-sql-ibase -no-sql-mysql -no-sql-odbc -no-sql-psql -no-sql-sqlite2 -sql-sqlite -qt-sqlite -skip qttools -skip qtandroidextras -skip qtmacextras -skip qtwayland -skip qtwebchannel -skip qtwebengine -skip qtwebview
