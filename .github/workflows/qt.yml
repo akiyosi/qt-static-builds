@@ -106,11 +106,6 @@ jobs:
   qt-for-mingw:
     runs-on: windows-latest
     steps:
-    
-    - name: Install correct version of Environment
-      run: |
-        choco uninstall mingw --force
-        choco install mingw --x64 --version=8.1.0 
 
     - name: check fxc.exe
       run: |
@@ -122,6 +117,16 @@ jobs:
         dir "${WinSdkPath}\VC\Tools\MSVC\14.29.30133\bin"
         dir "${WinSdkPath}\VC\Tools\MSVC\14.29.30133\bin\Hostx64"
         dir "${WinSdkPath}\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64"
+        dir "${WinSdkPath}"
+        dir "${WinSdkPath}\Utilities"
+        dir "${WinSdkPath}\Utilities\Bin"
+        dir "${WinSdkPath}\Utilities\Bin\x86"
+    
+    - name: Install correct version of Environment
+      run: |
+        choco uninstall mingw --force
+        choco install mingw --x64 --version=8.1.0 
+
 
     - name: Download Source
       shell: cmd
