@@ -112,6 +112,14 @@ jobs:
         choco uninstall mingw --force
         choco install mingw --x64 --version=8.1.0 
 
+    - name: check fxc.exe
+      run: |
+        $WinSdkPath = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -requires Microsoft.VisualStudio.Component.Windows10SDK -property installationPath
+        $WinSdkBin = "${WinSdkPath}\VC\Tools\MSVC\*\bin\Hostx64\x64"
+        dir "${WinSdkPath}\VC\Tools\MSVC\14.43.34808\bin"
+        dir "${WinSdkPath}\VC\Tools\MSVC\14.43.34808\bin\Hostx64"
+        dir "${WinSdkPath}\VC\Tools\MSVC\14.43.34808\bin\Hostx64\x64"
+
     - name: Download Source
       shell: cmd
       run: |
