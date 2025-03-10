@@ -116,9 +116,12 @@ jobs:
     #     dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\Bin\10.0.26100.0"
     #     dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\BIN\10.0.26100.0\X64"
 
-    - name: check PATH
+    - name: add PATH
       run: |
         echo "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\BIN\10.0.26100.0\X64" >> $GITHUB_PATH
+
+    - name: check PATH
+      run: |
         echo $env:path
     
     - name: Install correct version of Environment
