@@ -108,29 +108,14 @@ jobs:
     runs-on: windows-latest
     steps:
 
-    # - name: check fxc.exe
-    #   run: |
-    #     $WinSdkPath = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -requires Microsoft.VisualStudio.Component.Windows10SDK -property installationPath
-    #     $WinSdkBin = "${WinSdkPath}\VC\Tools\MSVC\*\bin\Hostx64\x64"
-    #     dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10"
-    #     dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\Bin\10.0.26100.0"
-    #     dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\BIN\10.0.26100.0\X64"
-
-    # - name: add PATH
-    #   run: |
-    #     echo "PATH=$env:path;C:\PROGRAM FILES (X86)\WINDOWS KITS\10\BIN\10.0.26100.0\X64" >> "${GITHUB_ENV}"
-
-    # - name: check PATH
-    #   run: |
-    #     echo $env:path
-
     - name: Add Windows SDK path to PATH
-      run: echo "PATH=$PATH:/C/PROGRAM FILES (X86)/WINDOWS KITS/10/BIN/10.0.26100.0/X64" >> $GITHUB_ENV
-      shell: bash
-
-    - name: check PATH
       run: |
-        echo $env:path
+        echo "PATH=$($env:path);C:\PROGRAM FILES (X86)\WINDOWS KITS\10\BIN\10.0.26100.0\X64" >> $env:GITHUB_ENV
+      shell: pwsh
+    
+    - name: Check PATH
+      run: echo $env:path
+      shell: pwsh
     
     - name: Install correct version of Environment
       run: |
