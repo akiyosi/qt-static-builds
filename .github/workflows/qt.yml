@@ -150,7 +150,9 @@ jobs:
     - name: Patch qtdeclarative
       run: |
         cd C:\qt5\qtdeclarative
-        patch -p1 < patch.diff
+        Get-Content patch.diff | patch -p1
+      shell: pwsh
+
 
     - name: Build
       run: |
