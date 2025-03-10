@@ -119,7 +119,7 @@ jobs:
     - name: check PATH
       run: |
         echo "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\BIN\10.0.26100.0\X64" >> $env:GITHUB_PATH
-        echo %PATH%
+        echo $PATH
     
     - name: Install correct version of Environment
       run: |
