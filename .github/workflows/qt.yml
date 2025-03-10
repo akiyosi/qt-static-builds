@@ -108,9 +108,6 @@ jobs:
     runs-on: windows-latest
     steps:
 
-    - name: Add Windows SDK path to PATH
-      run: echo "PATH=$PATH:/C/PROGRAM FILES (X86)/WINDOWS KITS/10/BIN/10.0.26100.0/X64" >> $GITHUB_ENV
-      shell: bash
     
     - name: Install correct version of Environment
       run: |
