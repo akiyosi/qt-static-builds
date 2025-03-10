@@ -150,9 +150,8 @@ jobs:
     - name: Patch qtdeclarative
       run: |
         cd C:\qt5\qtdeclarative
-        Get-Content patch.diff | patch -p1
+        Get-Content ${{ github.workspace }}\patch.diff | patch -p1
       shell: pwsh
-
 
     - name: Build
       run: |
