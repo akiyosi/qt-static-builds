@@ -118,10 +118,8 @@ jobs:
         dir "${WinSdkPath}\VC\Tools\MSVC\14.29.30133\bin\Hostx64"
         dir "${WinSdkPath}\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64"
         dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10"
-        dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\
         dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\Bin"
         dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\Bin\x86"
-        dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\8.1"
         dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\8.1"
         dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\8.1\Bin"
         dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\8.1\Bin\x86"
