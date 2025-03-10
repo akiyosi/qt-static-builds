@@ -111,16 +111,9 @@ jobs:
       run: |
         $WinSdkPath = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -requires Microsoft.VisualStudio.Component.Windows10SDK -property installationPath
         $WinSdkBin = "${WinSdkPath}\VC\Tools\MSVC\*\bin\Hostx64\x64"
-        dir "${WinSdkPath}\VC\Tools\MSVC\14.43.34808\bin"
-        dir "${WinSdkPath}\VC\Tools\MSVC\14.43.34808\bin\Hostx64"
-        dir "${WinSdkPath}\VC\Tools\MSVC\14.43.34808\bin\Hostx64\x64"
-        dir "${WinSdkPath}\VC\Tools\MSVC\14.29.30133\bin"
-        dir "${WinSdkPath}\VC\Tools\MSVC\14.29.30133\bin\Hostx64"
-        dir "${WinSdkPath}\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64"
         dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10"
         dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\Bin\10.0.26100.0"
-        dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\Bin\x64"
-        dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\Bin\x64\bin"
+        dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\Bin\10.0.26100.0\x64"
     
     - name: Install correct version of Environment
       run: |
