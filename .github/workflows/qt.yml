@@ -107,19 +107,18 @@ jobs:
     runs-on: windows-latest
     steps:
 
-    - name: check fxc.exe
-      run: |
-        $WinSdkPath = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -requires Microsoft.VisualStudio.Component.Windows10SDK -property installationPath
-        $WinSdkBin = "${WinSdkPath}\VC\Tools\MSVC\*\bin\Hostx64\x64"
-        dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10"
-        dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\Bin\10.0.26100.0"
-        dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\Bin\10.0.26100.0\x64"
+    # - name: check fxc.exe
+    #   run: |
+    #     $WinSdkPath = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -requires Microsoft.VisualStudio.Component.Windows10SDK -property installationPath
+    #     $WinSdkBin = "${WinSdkPath}\VC\Tools\MSVC\*\bin\Hostx64\x64"
+    #     dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10"
+    #     dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\Bin\10.0.26100.0"
+    #     dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\BIN\10.0.26100.0\X64"
     
     - name: Install correct version of Environment
       run: |
         choco uninstall mingw --force
         choco install mingw --x64 --version=8.1.0 
-
 
     - name: Download Source
       shell: cmd
@@ -148,8 +147,7 @@ jobs:
 
     - name: Build
       run: |
-        $WinSdkPath = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -requires Microsoft.VisualStudio.Component.Windows10SDK -property installationPath
-        $WinSdkBin = "${WinSdkPath}\VC\Tools\MSVC\14.43.34808\bin\Hostx64\x64"
+        $WinSdkBin = "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\BIN\10.0.26100.0\X64"
         echo "Adding Windows SDK bin path: $WinSdkBin"
         echo "$WinSdkBin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
         mkdir C:\qt5_shadow
