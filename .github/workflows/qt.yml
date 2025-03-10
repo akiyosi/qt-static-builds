@@ -85,6 +85,7 @@ jobs:
         curl -L "https://codereview.qt-project.org/gitweb?p=qt/qtbase.git;a=patch;h=cdf64b0e47115cc473e1afd1472b4b09e130b2a5" -o cdf64b0.diff
         patch -p1 < ./cdf64b0.diff
         cd ..
+        export CXXFLAGS="-Wno-enum-constexpr-conversion"
         ./configure -static -release -prefix ${{ github.workspace }}/Qt -platform macx-clang -skip qtandroidextras -skip qtwayland -skip webengine -skip qtwinextras -skip qtx11extras -nomake tests -nomake examples -opensource -confirm-license -c++std c++17
         sudo make -j 2
         sudo make install -j 2
