@@ -116,13 +116,21 @@ jobs:
     #     dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\Bin\10.0.26100.0"
     #     dir "C:\PROGRAM FILES (X86)\WINDOWS KITS\10\BIN\10.0.26100.0\X64"
 
-    - name: add PATH
-      run: |
-        echo "PATH=$env:path;C:\PROGRAM FILES (X86)\WINDOWS KITS\10\BIN\10.0.26100.0\X64" >> "${GITHUB_ENV}"
+    # - name: add PATH
+    #   run: |
+    #     echo "PATH=$env:path;C:\PROGRAM FILES (X86)\WINDOWS KITS\10\BIN\10.0.26100.0\X64" >> "${GITHUB_ENV}"
 
-    - name: check PATH
-      run: |
-        echo $env:path
+    # - name: check PATH
+    #   run: |
+    #     echo $env:path
+
+    - name: Add Windows SDK path to PATH
+      run: echo "PATH=$PATH:C:\PROGRAM FILES (X86)\WINDOWS KITS\10\BIN\10.0.26100.0\X64" >> $GITHUB_ENV
+      shell: bash
+    
+    - name: Check PATH
+      run: echo $PATH
+      shell: bash
     
     - name: Install correct version of Environment
       run: |
