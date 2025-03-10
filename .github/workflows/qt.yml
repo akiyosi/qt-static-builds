@@ -118,9 +118,9 @@ jobs:
         dir "${WinSdkPath}\VC\Tools\MSVC\14.29.30133\bin\Hostx64"
         dir "${WinSdkPath}\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64"
         dir "${WinSdkPath}"
-        dir "${WinSdkPath}\Utilities"
-        dir "${WinSdkPath}\Utilities\Bin"
-        dir "${WinSdkPath}\Utilities\Bin\x86"
+        dir "${WinSdkPath}\SDK"
+        dir "${WinSdkPath}\SDK\Bin"
+        dir "${WinSdkPath}\SDK\Bin\x86"
     
     - name: Install correct version of Environment
       run: |
