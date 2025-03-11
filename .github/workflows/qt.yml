@@ -91,6 +91,7 @@ jobs:
           -release \
           -opensource \
           -confirm-license \
+          -verbose \
           -skip qtandroidextras \
           -skip qtwayland \
           -skip webengine \
