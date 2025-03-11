@@ -86,7 +86,7 @@ jobs:
         # patch -p1 < ./cdf64b0.diff
         cd qt5
         ./configure \
-          -prefix ${{ github.workspace }}/Qt -platform macx-clang \
+          -prefix ${{ github.workspace }}/Qt \
           -static \
           -release \
           -opensource \
@@ -98,8 +98,8 @@ jobs:
           -skip qtx11extras \
           -nomake tests \
           -nomake examples
-        cmake --build . --parallel "$(sysctl -n hw.ncpu)"
-        cmake --install .
+        sudo cmake --build . --parallel "$(sysctl -n hw.ncpu)"
+        sudo cmake --install .
         rm -fr ${{ github.workspace }}/qt5
 
     - name: Package
