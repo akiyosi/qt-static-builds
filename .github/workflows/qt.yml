@@ -77,14 +77,14 @@ jobs:
 
     - name: macOS prerequisites
       run: |
-        brew install cmake ninja
+        brew install cmake ninja llvm
 
     - name: Build Qt
       run: |
-        cd ${{ github.workspace }}/qt5/qtbase
-        curl -L "https://codereview.qt-project.org/gitweb?p=qt/qtbase.git;a=patch;h=cdf64b0e47115cc473e1afd1472b4b09e130b2a5" -o cdf64b0.diff
-        patch -p1 < ./cdf64b0.diff
-        cd ..
+        # cd ${{ github.workspace }}/qt5/qtbase
+        # curl -L "https://codereview.qt-project.org/gitweb?p=qt/qtbase.git;a=patch;h=cdf64b0e47115cc473e1afd1472b4b09e130b2a5" -o cdf64b0.diff
+        # patch -p1 < ./cdf64b0.diff
+        cd qt5
         ./configure \
           -prefix ${{ github.workspace }}/Qt -platform macx-clang \
           -static \
