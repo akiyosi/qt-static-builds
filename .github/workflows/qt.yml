@@ -99,8 +99,8 @@ jobs:
           -skip qtx11extras \
           -nomake tests \
           -nomake examples
-        sudo make -j "$(sysctl -n hw.ncpu)"
-        sudo make install -j "$(sysctl -n hw.ncpu)"
+        qmake -j "$(sysctl -n hw.ncpu)"
+        qmake install
         rm -fr ${{ github.workspace }}/qt5
 
     - name: Package
