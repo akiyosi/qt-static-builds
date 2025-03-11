@@ -85,7 +85,8 @@ jobs:
         # curl -L "https://codereview.qt-project.org/gitweb?p=qt/qtbase.git;a=patch;h=cdf64b0e47115cc473e1afd1472b4b09e130b2a5" -o cdf64b0.diff
         # patch -p1 < ./cdf64b0.diff
         cd qt5
-        ./configure \
+        mkdir build && cd build
+        ../configure \
           -prefix ${{ github.workspace }}/Qt \
           -static \
           -release \
