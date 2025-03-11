@@ -77,7 +77,7 @@ jobs:
 
     - name: macOS prerequisites
       run: |
-        brew install cmake ninja
+        brew upgrade cmake ninja
 
     - name: Build Qt
       run: |
