@@ -77,7 +77,7 @@ jobs:
 
     - name: macOS prerequisites
       run: |
-        brew reinstall cmake ninja
+        # brew reinstall cmake ninja
 
     - name: Build Qt
       run: |
@@ -85,8 +85,7 @@ jobs:
         # curl -L "https://codereview.qt-project.org/gitweb?p=qt/qtbase.git;a=patch;h=cdf64b0e47115cc473e1afd1472b4b09e130b2a5" -o cdf64b0.diff
         # patch -p1 < ./cdf64b0.diff
         cd qt5
-        mkdir build && cd build
-        ../configure \
+        ./configure \
           -prefix ${{ github.workspace }}/Qt \
           -static \
           -release \
@@ -100,8 +99,8 @@ jobs:
           -skip qtx11extras \
           -nomake tests \
           -nomake examples
-        cmake --build . --parallel "$(sysctl -n hw.ncpu)"
-        cmake --install .
+        sudo make -j "$(sysctl -n hw.ncpu)"
+        sudo make install -j "$(sysctl -n hw.ncpu)"
         rm -fr ${{ github.workspace }}/qt5
 
     - name: Package
