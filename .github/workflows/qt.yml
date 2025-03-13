@@ -82,6 +82,11 @@ jobs:
         fetch-depth: 0
         path: .
 
+    - name: check
+      run: |
+        ls -l
+        ls -l ${{ github.workspace }}
+
     - name: Patch Qt5
       run: |
         rm -rf qt5/qtlocation/src/3rdparty/mapbox-gl-native/deps/boost/1.65.1/include/boost
