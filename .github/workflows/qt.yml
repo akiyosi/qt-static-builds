@@ -87,6 +87,12 @@ jobs:
         ls -l
         ls -l ${{ github.workspace }}
 
+    - name: MacOS prerequisites
+      run: |
+        ls -l
+        ls -l ${{ github.workspace }}
+        brew install boost freetype glib hunspell jpeg-turbo libpng libtiff make md4c node pcre2 pkgconf sqlite webp zstd
+
     - name: Patch Qt5
       run: |
         rm -rf qt5/qtlocation/src/3rdparty/mapbox-gl-native/deps/boost/1.65.1/include/boost
@@ -160,11 +166,7 @@ jobs:
         echo "PATH=$($env:path);C:\PROGRAM FILES (X86)\WINDOWS KITS\10\BIN\10.0.26100.0\X64" >> $env:GITHUB_ENV
       shell: pwsh
     
-    - name: Check PATH
-      run: echo $env:path
-      shell: pwsh
-    
-    - name: Install correct version of Environment
+    - name: Windows prerequisites
       run: |
         choco uninstall mingw --force
         choco install mingw --x64 --version=8.1.0 
