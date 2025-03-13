@@ -68,19 +68,19 @@ jobs:
     runs-on: macos-14
     steps:
 
-    - name: Download Qt src
-      run: |
-        curl -L -o qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz https://download.qt.io/official_releases/qt/5.15/${{ env.qt_ver }}/single/qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
-        tar Jxf qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
-        rm qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
-        mv qt-everywhere-src-${{ env.qt_ver }} qt5
-
     - name: Checkout code
       uses: actions/checkout@v3
       with:
         repository: ''
         fetch-depth: 0
         path: .
+
+    - name: Download Qt src
+      run: |
+        curl -L -o qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz https://download.qt.io/official_releases/qt/5.15/${{ env.qt_ver }}/single/qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
+        tar Jxf qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
+        rm qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
+        mv qt-everywhere-src-${{ env.qt_ver }} qt5
 
     - name: check
       run: |
