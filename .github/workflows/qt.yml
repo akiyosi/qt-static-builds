@@ -75,10 +75,12 @@ jobs:
         rm qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
         mv qt-everywhere-src-${{ env.qt_ver }} qt5
 
-    - name: check
-      run: |
-        ls -l
-        ls -l ${{ github.workspace }}
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        repository: ''
+        fetch-depth: 0
+        path: .
 
     - name: Patch Qt5
       run: |
