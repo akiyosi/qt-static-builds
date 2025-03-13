@@ -79,28 +79,28 @@ jobs:
       run: |
         rm -rf qt5/qtlocation/src/3rdparty/mapbox-gl-native/deps/boost/1.65.1/include/boost
         ln -s /opt/homebrew/opt/boost/include/boost qt5/qtlocation/src/3rdparty/mapbox-gl-native/deps/boost/1.65.1/include
-        cp ./35d566724c48180c9a372c2ed50a253871a51574.diff qt5/qtlocation/src/3rdparty/mapbox-gl-native
-        cp ./5a07e1967dcc925d9def47accadae991436b9686.diff qt5/qtlocation/src/3rdparty/mapbox-gl-native
+        cp ${{ github.workspace }}/35d566724c48180c9a372c2ed50a253871a51574.diff qt5/qtlocation/src/3rdparty/mapbox-gl-native
+        cp ${{ github.workspace }}/5a07e1967dcc925d9def47accadae991436b9686.diff qt5/qtlocation/src/3rdparty/mapbox-gl-native
         cd qt5/qtlocation/src/3rdparty/mapbox-gl-native
         patch < 35d566724c48180c9a372c2ed50a253871a51574.diff
         patch < 5a07e1967dcc925d9def47accadae991436b9686.diff
         cd ../../../../..
-        cp ./0001-CVE-2023-51714-qtbase-5.15.diff qt5/qtbase
-        cp ./0002-CVE-2023-51714-qtbase-5.15.diff qt5/qtbase
-        cp ./CVE-2024-25580-qtbase-5.15.diff qt5/qtbase
-        cp ./CVE-2024-39936-qtbase-5.15.patch qt5/qtbase
+        cp ${{ github.workspace }}/0001-CVE-2023-51714-qtbase-5.15.diff qt5/qtbase
+        cp ${{ github.workspace }}/0002-CVE-2023-51714-qtbase-5.15.diff qt5/qtbase
+        cp ${{ github.workspace }}/CVE-2024-25580-qtbase-5.15.diff qt5/qtbase
+        cp ${{ github.workspace }}/CVE-2024-39936-qtbase-5.15.patch qt5/qtbase
         cd qt5/qtbase
         patch < 0001-CVE-2023-51714-qtbase-5.15.diff
         patch < 0002-CVE-2023-51714-qtbase-5.15.diff
         patch < CVE-2024-25580-qtbase-5.15.diff
         patch < CVE-2024-39936-qtbase-5.15.patch
         cd ../..
-        cp ./CVE-2024-36048-qtnetworkauth-5.15.diff qt5/qtnetworkauth
+        cp ${{ github.workspace }}/CVE-2024-36048-qtnetworkauth-5.15.diff qt5/qtnetworkauth
         cd qt5/qtnetworkauth
         patch < CVE-2024-36048-qtnetworkauth-5.15.diff
         cd ../..
-        cp ./qtvirtualkeyboard0.diff qt5/qtvirtualkeyboard/src/plugins/hunspell/hunspellinputmethod
-        cp ./qtvirtualkeyboard1.diff qt5/qtvirtualkeyboard/src/plugins/hunspell/hunspellinputmethod
+        cp ${{ github.workspace }}/qtvirtualkeyboard0.diff qt5/qtvirtualkeyboard/src/plugins/hunspell/hunspellinputmethod
+        cp ${{ github.workspace }}/qtvirtualkeyboard1.diff qt5/qtvirtualkeyboard/src/plugins/hunspell/hunspellinputmethod
         cd qt5/qtvirtualkeyboard/src/plugins/hunspell/hunspellinputmethod
         patch < qtvirtualkeyboard0.diff
         patch < qtvirtualkeyboard1.diff
