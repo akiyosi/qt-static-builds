@@ -75,6 +75,11 @@ jobs:
         rm qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
         mv qt-everywhere-src-${{ env.qt_ver }} qt5
 
+    - name: check
+      run: |
+        ls -l
+        ls -l ${{ github.workspace }}
+
     - name: Patch Qt5
       run: |
         rm -rf qt5/qtlocation/src/3rdparty/mapbox-gl-native/deps/boost/1.65.1/include/boost
