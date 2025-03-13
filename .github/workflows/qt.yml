@@ -75,18 +75,40 @@ jobs:
         rm qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
         mv qt-everywhere-src-${{ env.qt_ver }} qt5
 
-    - name: macOS prerequisites
+    - name: Patch Qt5
       run: |
-        # brew reinstall cmake ninja
+        rm -rf qt5/qtlocation/src/3rdparty/mapbox-gl-native/deps/boost/1.65.1/include/boost
+        ln -s /opt/homebrew/opt/boost/include/boost qt5/qtlocation/src/3rdparty/mapbox-gl-native/deps/boost/1.65.1/include
+        cp ./35d566724c48180c9a372c2ed50a253871a51574.diff qt5/qtlocation/src/3rdparty/mapbox-gl-native
+        cp ./5a07e1967dcc925d9def47accadae991436b9686.diff qt5/qtlocation/src/3rdparty/mapbox-gl-native
+        cd qt5/qtlocation/src/3rdparty/mapbox-gl-native
+        patch < 35d566724c48180c9a372c2ed50a253871a51574.diff
+        patch < 5a07e1967dcc925d9def47accadae991436b9686.diff
+        cd ../../../../..
+        cp ./0001-CVE-2023-51714-qtbase-5.15.diff qt5/qtbase
+        cp ./0002-CVE-2023-51714-qtbase-5.15.diff qt5/qtbase
+        cp ./CVE-2024-25580-qtbase-5.15.diff qt5/qtbase
+        cp ./CVE-2024-39936-qtbase-5.15.patch qt5/qtbase
+        cd qt5/qtbase
+        patch < 0001-CVE-2023-51714-qtbase-5.15.diff
+        patch < 0002-CVE-2023-51714-qtbase-5.15.diff
+        patch < CVE-2024-25580-qtbase-5.15.diff
+        patch < CVE-2024-39936-qtbase-5.15.patch
+        cd ../..
+        cp ./CVE-2024-36048-qtnetworkauth-5.15.diff qt5/qtnetworkauth
+        cd qt5/qtnetworkauth
+        patch < CVE-2024-36048-qtnetworkauth-5.15.diff
+        cd ../..
+        cp ./qtvirtualkeyboard0.diff qt5/qtvirtualkeyboard/src/plugins/hunspell/hunspellinputmethod
+        cp ./qtvirtualkeyboard1.diff qt5/qtvirtualkeyboard/src/plugins/hunspell/hunspellinputmethod
+        cd qt5/qtvirtualkeyboard/src/plugins/hunspell/hunspellinputmethod
+        patch < qtvirtualkeyboard0.diff
+        patch < qtvirtualkeyboard1.diff
 
     - name: Build Qt
       run: |
-        # cd ${{ github.workspace }}/qt5/qtbase
-        # curl -L "https://codereview.qt-project.org/gitweb?p=qt/qtbase.git;a=patch;h=cdf64b0e47115cc473e1afd1472b4b09e130b2a5" -o cdf64b0.diff
-        # patch -p1 < ./cdf64b0.diff
         cd qt5
-        mkdir build && cd build
-        ../configure \
+        ./configure \
           -prefix ${{ github.workspace }}/Qt \
           -static \
           -release \
@@ -100,8 +122,8 @@ jobs:
           -skip qtx11extras \
           -nomake tests \
           -nomake examples
-        qmake -j "$(sysctl -n hw.ncpu)"
-        qmake install
+        make -j "$(sysctl -n hw.ncpu)"
+        make install
         rm -fr ${{ github.workspace }}/qt5
 
     - name: Package
@@ -145,7 +167,7 @@ jobs:
         dir C:\qt5
 
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: ''
         fetch-depth: 0
@@ -163,7 +185,7 @@ jobs:
     - name: Patch qtdeclarative
       run: |
         cd C:\qt5\qtdeclarative
-        Get-Content ${{ github.workspace }}\patch.diff | patch -p1
+        Get-Content ${{ github.workspace }}\qt-forum-topic128587.diff | patch -p1
       shell: pwsh
 
     - name: Build
@@ -194,7 +216,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: actions/download-artifact@v4
 
