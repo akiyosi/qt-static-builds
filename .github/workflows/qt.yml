@@ -82,10 +82,6 @@ jobs:
         rm qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
         mv qt-everywhere-src-${{ env.qt_ver }} qt5
 
-    - name: check
-      run: |
-        ls -l
-        ls -l ${{ github.workspace }}
 
     - name: MacOS prerequisites
       run: |
@@ -232,18 +228,30 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/download-artifact@v4
+      - name: Create and push tag
+        run: |
+          git fetch --tags
+          if ! git rev-parse "qt-static-${{ env.qt_ver }}" >/dev/null 2>&1; then
+            git tag qt-static-${{ env.qt_ver }}
+            git push origin qt-static-${{ env.qt_ver }}
+          fi
+          git push origin --tags
+
 
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y gettext-base
 
+      - uses: actions/download-artifact@v4
+
       - name: Publish
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release delete qt-static-${{ env.qt_ver }} --yes || true
-          git push origin qt-static-${{ env.qt_ver }} || true
-          gh release create qt-static-${{ env.qt_ver }} --title qt-static-${{ env.qt_ver }} /home/runner/work/qt-static-builds/qt-static-builds/qt-win-static/* /home/runner/work/qt-static-builds/qt-static-builds/qt-macos-arm64-static/* /home/runner/work/qt-static-builds/qt-static-builds/qt-linux-static/*
+          gh release create qt-static-${{ env.qt_ver }} --title qt-static-${{ env.qt_ver }} \
+            /home/runner/work/qt-static-builds/qt-static-builds/qt-win-static/* \
+            /home/runner/work/qt-static-builds/qt-static-builds/qt-macos-arm64-static/* \
+            /home/runner/work/qt-static-builds/qt-static-builds/qt-linux-static/*
 
