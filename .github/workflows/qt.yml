@@ -237,13 +237,17 @@ jobs:
           fi
           git push origin --tags
 
-
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y gettext-base
 
       - uses: actions/download-artifact@v4
+
+      - name: check
+        run: |
+          ls -l
+          tree
 
       - name: Publish
         env:
