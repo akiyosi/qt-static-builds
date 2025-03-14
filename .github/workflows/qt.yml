@@ -58,6 +58,8 @@ jobs:
 
     - name: Upload
       uses: actions/upload-artifact@v4
+      env:
+        archiveName: qt-win-${{ env.qt_ver }}
       with:
         name: qt-linux-static
         path: ${{env.archiveName}}.tar.bz2
@@ -148,6 +150,8 @@ jobs:
 
     - name: Upload
       uses: actions/upload-artifact@v4
+      env:
+        archiveName: qt-win-${{ env.qt_ver }}
       with:
         name: qt-macos-arm64-static
         path: ${{env.archiveName}}.tar.bz2
@@ -214,6 +218,8 @@ jobs:
 
     - name: Upload
       uses: actions/upload-artifact@v4
+      env:
+        archiveName: qt-win-${{ env.qt_ver }}
       with:
         name: qt-win-static
         path: ${{env.archiveName}}.zip
