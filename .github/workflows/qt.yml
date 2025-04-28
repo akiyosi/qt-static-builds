@@ -3,12 +3,14 @@ name: build-qt
 on: [push]
 
 env: 
-  qt_ver:    "5.15.12"
+  qt_ver:    "5.15.16"
 
 jobs:
 
   qt-for-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    env:
+      QT_DIR: ${{ github.workspace }}/Qt
     steps:
 
     - name: Linux prerequisites 
@@ -41,7 +43,7 @@ jobs:
         echo -e "find_package(Qt5 REQUIRED COMPONENTS Core Gui DBus)\n$(cat $FILE)" > $FILE 
         echo -e "$(head -n -5 $FILE)" > $FILE 
         sed -i -e 's/ MODULE / STATIC /g' $FILE
-        cd fcitx-qt5/qt5/platforminputcontext && cmake . &&  make -j $(grep -c ^processor /proc/cpuinfo)
+        cd fcitx-qt5/qt5/platforminputcontext && cmake . &&  make -j 1
 
     - name: Copy libfcitxplatforminputcontextplugin.a
       run: |
@@ -56,6 +58,8 @@ jobs:
 
     - name: Upload
       uses: actions/upload-artifact@v4
+      env:
+        archiveName: qt-linux-${{ env.qt_ver }}
       with:
         name: qt-linux-static
         path: ${{env.archiveName}}.tar.bz2
@@ -66,6 +70,13 @@ jobs:
     runs-on: macos-14
     steps:
 
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        repository: ''
+        fetch-depth: 0
+        path: .
+
     - name: Download Qt src
       run: |
         curl -L -o qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz https://download.qt.io/official_releases/qt/5.15/${{ env.qt_ver }}/single/qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
@@ -73,15 +84,62 @@ jobs:
         rm qt-everywhere-opensource-src-${{ env.qt_ver }}.tar.xz
         mv qt-everywhere-src-${{ env.qt_ver }} qt5
 
+
+    - name: MacOS prerequisites
+      run: |
+        ls -l
+        ls -l ${{ github.workspace }}
+        brew install boost freetype glib hunspell jpeg-turbo libpng libtiff make md4c node pcre2 pkgconf sqlite webp zstd
+
+    - name: Patch Qt5
+      run: |
+        rm -rf qt5/qtlocation/src/3rdparty/mapbox-gl-native/deps/boost/1.65.1/include/boost
+        ln -s /opt/homebrew/opt/boost/include/boost qt5/qtlocation/src/3rdparty/mapbox-gl-native/deps/boost/1.65.1/include
+        cp ${{ github.workspace }}/35d566724c48180c9a372c2ed50a253871a51574.diff qt5/qtlocation/src/3rdparty/mapbox-gl-native
+        cp ${{ github.workspace }}/5a07e1967dcc925d9def47accadae991436b9686.diff qt5/qtlocation/src/3rdparty/mapbox-gl-native
+        cd qt5/qtlocation/src/3rdparty/mapbox-gl-native
+        patch < 35d566724c48180c9a372c2ed50a253871a51574.diff
+        patch < 5a07e1967dcc925d9def47accadae991436b9686.diff
+        cd ../../../../..
+        cp ${{ github.workspace }}/0001-CVE-2023-51714-qtbase-5.15.diff qt5/qtbase
+        cp ${{ github.workspace }}/0002-CVE-2023-51714-qtbase-5.15.diff qt5/qtbase
+        cp ${{ github.workspace }}/CVE-2024-25580-qtbase-5.15.diff qt5/qtbase
+        cp ${{ github.workspace }}/CVE-2024-39936-qtbase-5.15.patch qt5/qtbase
+        cd qt5/qtbase
+        patch < 0001-CVE-2023-51714-qtbase-5.15.diff
+        patch < 0002-CVE-2023-51714-qtbase-5.15.diff
+        patch < CVE-2024-25580-qtbase-5.15.diff
+        patch < CVE-2024-39936-qtbase-5.15.patch
+        cd ../..
+        cp ${{ github.workspace }}/CVE-2024-36048-qtnetworkauth-5.15.diff qt5/qtnetworkauth
+        cd qt5/qtnetworkauth
+        patch < CVE-2024-36048-qtnetworkauth-5.15.diff
+        cd ../..
+        cp ${{ github.workspace }}/qtvirtualkeyboard0.diff qt5/qtvirtualkeyboard/src/plugins/hunspell/hunspellinputmethod
+        cp ${{ github.workspace }}/qtvirtualkeyboard1.diff qt5/qtvirtualkeyboard/src/plugins/hunspell/hunspellinputmethod
+        cd qt5/qtvirtualkeyboard/src/plugins/hunspell/hunspellinputmethod
+        patch < qtvirtualkeyboard0.diff
+        patch < qtvirtualkeyboard1.diff
+
     - name: Build Qt
       run: |
-        cd ${{ github.workspace }}/qt5/qtbase
-        curl -L "https://codereview.qt-project.org/gitweb?p=qt/qtbase.git;a=patch;h=cdf64b0e47115cc473e1afd1472b4b09e130b2a5" -o cdf64b0.diff
-        patch -p1 < ./cdf64b0.diff
-        cd ..
-        ./configure -static -release -prefix ${{ github.workspace }}/Qt -platform macx-clang -skip qt3d -skip qtandroidextras -skip qtwayland -skip webengine -skip qtwinextras -skip qtx11extras -nomake tests -nomake examples -opensource -confirm-license -c++std c++17
-        sudo make -j 3
-        sudo make install -j 3
+        cd qt5
+        ./configure \
+          -prefix ${{ github.workspace }}/Qt \
+          -static \
+          -release \
+          -opensource \
+          -confirm-license \
+          -verbose \
+          -skip qtandroidextras \
+          -skip qtwayland \
+          -skip webengine \
+          -skip qtwinextras \
+          -skip qtx11extras \
+          -nomake tests \
+          -nomake examples
+        make -j "$(sysctl -n hw.ncpu)"
+        make install
         rm -fr ${{ github.workspace }}/qt5
 
     - name: Package
@@ -92,6 +150,8 @@ jobs:
 
     - name: Upload
       uses: actions/upload-artifact@v4
+      env:
+        archiveName: qt-macos-arm64-${{ env.qt_ver }}
       with:
         name: qt-macos-arm64-static
         path: ${{env.archiveName}}.tar.bz2
@@ -100,8 +160,13 @@ jobs:
   qt-for-mingw:
     runs-on: windows-latest
     steps:
+
+    - name: Add Windows SDK path to PATH
+      run: |
+        echo "PATH=$($env:path);C:\PROGRAM FILES (X86)\WINDOWS KITS\10\BIN\10.0.26100.0\X64" >> $env:GITHUB_ENV
+      shell: pwsh
     
-    - name: Install correct version of Environment
+    - name: Windows prerequisites
       run: |
         choco uninstall mingw --force
         choco install mingw --x64 --version=8.1.0 
@@ -116,27 +181,33 @@ jobs:
         dir C:\qt5
 
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: ''
         fetch-depth: 0
         path: .
 
-    # - name: Patch
-    #   run: |
-    #     cd C:\qt5
-    #     $ch1="defined(Q_CC_MINGW) && WINVER < 0x0602"
-    #     $rep1="defined(Q_CC_MINGW) && WINVER < 0x0602 && !(_WIN32_WINNT >= _WIN32_WINNT_WIN8)"
-    #     $data=Get-Content  .\qtbase\src\corelib\io\qfilesystemengine_win.cpp | % { $_ -replace [regex]::Escape($ch1), $rep1 }
-    #     $data | Out-File   .\qtbase\src\corelib\io\qfilesystemengine_win.cpp -Encoding UTF8
-    #     (Get-Content qtbase\src\corelib\io\qfilesystemengine_win.cpp)[650..670]
+    - name: Patch qtbase
+      run: |
+        cd C:\qt5
+        $ch1="defined(Q_CC_MINGW) && WINVER < 0x0602"
+        $rep1="defined(Q_CC_MINGW) && WINVER < 0x0602 && !(_WIN32_WINNT >= _WIN32_WINNT_WIN8)"
+        $data=Get-Content  .\qtbase\src\corelib\io\qfilesystemengine_win.cpp | % { $_ -replace [regex]::Escape($ch1), $rep1 }
+        $data | Out-File   .\qtbase\src\corelib\io\qfilesystemengine_win.cpp -Encoding UTF8
+        (Get-Content qtbase\src\corelib\io\qfilesystemengine_win.cpp)[650..670]
+
+    - name: Patch qtdeclarative
+      run: |
+        cd C:\qt5\qtdeclarative
+        Get-Content ${{ github.workspace }}\qt-forum-topic128587.diff | patch -p1
+      shell: pwsh
 
     - name: Build
       run: |
         mkdir C:\qt5_shadow
         cd C:\qt5_shadow
-        ..\qt5\configure.bat -platform win32-g++ -prefix "D:\\qt5" -datadir "D:\\qt5\\share\\qt5" -archdatadir "D:\\qt5\\share\\qt5" -examplesdir "D:\\qt5\\share\\qt5\\examples" -testsdir "D:\\qt5\\share\\qt5\\tests" -opengl desktop -release -opensource -confirm-license -static -static-runtime -no-jasper -no-mng -D "JAS_DLL=0" -no-openssl -nomake tests -nomake examples -no-icu -no-fontconfig -schannel -dbus -qt-freetype -qt-pcre -qt-libpng -qt-libjpeg -qt-harfbuzz -qt-assimp -qt-doubleconversion -qt-tiff -qt-webp -no-iconv -no-gstreamer -no-wmf -feature-relocatable -no-sql-ibase -no-sql-mysql -no-sql-odbc -no-sql-psql -no-sql-sqlite2 -sql-sqlite -qt-sqlite -skip qttools -skip qtandroidextras -skip qtmacextras -skip qtwayland -skip qtwebchannel -skip qtwebengine -skip qtwebview
-        mingw32-make -j2
+        ..\qt5\configure.bat -platform win32-g++ -prefix "D:\\qt5" -datadir "D:\\qt5\\share\\qt5" -archdatadir "D:\\qt5\\share\\qt5" -examplesdir "D:\\qt5\\share\\qt5\\examples" -testsdir "D:\\qt5\\share\\qt5\\tests" -opengl desktop -release -opensource -confirm-license -static -no-jasper -no-mng -D "JAS_DLL=0" -no-openssl -nomake tests -nomake examples -no-icu -no-fontconfig -schannel -dbus -qt-freetype -qt-pcre -qt-libpng -qt-libjpeg -qt-harfbuzz -qt-assimp -qt-doubleconversion -qt-tiff -qt-webp -no-iconv -no-gstreamer -no-wmf -feature-relocatable -no-sql-ibase -no-sql-mysql -no-sql-odbc -no-sql-psql -no-sql-sqlite2 -sql-sqlite -qt-sqlite -skip qttools -skip qtandroidextras -skip qtmacextras -skip qtwayland -skip qtwebchannel -skip qtwebengine -skip qtwebview
+        mingw32-make -j4
         mingw32-make install
 
     - name: Package
@@ -147,6 +218,8 @@ jobs:
 
     - name: Upload
       uses: actions/upload-artifact@v4
+      env:
+        archiveName: qt-win-${{ env.qt_ver }}
       with:
         name: qt-win-static
         path: ${{env.archiveName}}.zip
@@ -159,20 +232,36 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: actions/download-artifact@v4
+      - name: Create and push tag
+        run: |
+          git fetch --tags
+          if ! git rev-parse "qt-static-${{ env.qt_ver }}" >/dev/null 2>&1; then
+            git tag qt-static-${{ env.qt_ver }}
+            git push origin qt-static-${{ env.qt_ver }}
+          fi
+          git push origin --tags
 
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y gettext-base
 
+      - uses: actions/download-artifact@v4
+
+      - name: check
+        run: |
+          ls -l
+          tree
+
       - name: Publish
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release delete qt-static-${{ env.qt_ver }} --yes || true
-          git push origin qt-static-${{ env.qt_ver }} || true
-          gh release create qt-static-${{ env.qt_ver }} --title qt-static-${{ env.qt_ver }} /home/runner/work/qt-static-builds/qt-static-builds/qt-win-static/* /home/runner/work/qt-static-builds/qt-static-builds/qt-macos-arm64-static/* /home/runner/work/qt-static-builds/qt-static-builds/qt-linux-static/*
+          gh release create qt-static-${{ env.qt_ver }} --title qt-static-${{ env.qt_ver }} \
+            /home/runner/work/qt-static-builds/qt-static-builds/qt-win-static/* \
+            /home/runner/work/qt-static-builds/qt-static-builds/qt-macos-arm64-static/* \
+            /home/runner/work/qt-static-builds/qt-static-builds/qt-linux-static/*
 
